@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - TokoWeb</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Arial,sans-serif;
+  background:#f4f7fb;
+  color:#172033;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.card{
+  width:100%;
+  max-width:410px;
+  background:#fff;
+  border:1px solid #e7edf5;
+  border-radius:22px;
+  padding:30px 25px;
+  box-shadow:0 10px 35px rgba(30,70,120,.12);
+}
+
+.logo{
+  text-align:center;
+  font-size:27px;
+  font-weight:800;
+  color:#1769e0;
+  margin-bottom:8px;
+}
+
+.subtitle{
+  text-align:center;
+  color:#718096;
+  margin-bottom:25px;
+  font-size:14px;
+}
+
+label{
+  display:block;
+  margin:16px 0 7px;
+  font-size:14px;
+  font-weight:600;
+}
+
+input{
+  width:100%;
+  height:48px;
+  padding:0 14px;
+  border:1px solid #d7dfeb;
+  border-radius:11px;
+  outline:none;
+  background:#fafcff;
+  color:#172033;
+  font-size:15px;
+}
+
+input:focus{
+  border-color:#2478ed;
+  box-shadow:0 0 0 3px rgba(36,120,237,.1);
+}
+
+.message{
+  display:none;
+  margin-top:15px;
+  padding:12px 14px;
+  border-radius:10px;
+  font-size:13px;
+  line-height:1.4;
+}
+
+.message.error{
+  display:block;
+  background:#fff1f1;
+  color:#c62828;
+  border:1px solid #ffd0d0;
+}
+
+.message.success{
+  display:block;
+  background:#effaf3;
+  color:#198754;
+  border:1px solid #c9efd8;
+}
+
+button{
+  width:100%;
+  height:49px;
+  margin-top:20px;
+  border:0;
+  border-radius:11px;
+  background:#1769e0;
+  color:white;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+}
+
+.bottom{
+  text-align:center;
+  margin-top:20px;
+  color:#718096;
+  font-size:14px;
+}
+
+.bottom a{
+  color:#1769e0;
+  text-decoration:none;
+  font-weight:700;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <div class="logo">TokoWeb</div>
+
+  <div class="subtitle">
+    Masuk ke akun Anda
+  </div>
+
+  <form id="loginForm">
+
+    <label>Username</label>
+    <input
+      id="username"
+      name="username"
+      type="text"
+      placeholder="Masukkan username"
+      autocomplete="username"
+      required
+    >
+
+    <label>Password</label>
+    <input
+      id="password"
+      name="password"
+      type="password"
+      placeholder="Masukkan password"
+      autocomplete="current-password"
+      required
+    >
+
+    <label style="display:flex;align-items:center;gap:8px;margin-top:15px;font-weight:normal;cursor:pointer;">
+      <input id="rememberMe" type="checkbox" style="width:auto;">
+      <span>Ingat saya</span>
+    </label>
+
+    <div class="message" id="message"></div>
+
+    <button id="loginButton" type="submit">
+      Login
+    </button>
+
+  </form>
+
+<div style="text-align:right;margin-top:14px;"><a href="/forgot-password.html" style="color:#1769e0;text-decoration:none;font-size:13px;font-weight:700;">Lupa password?</a></div>
+  <div class="bottom">
+    Belum punya akun?
+    <a href="/register.html">Daftar sekarang</a>
+  </div>
+
+</div>
+
+<script>
+(async()=>{try{const r=await fetch("/api/me");if(r.ok){const d=await r.json();if(d.ok)location.href="/dashboard.html"}}catch(e){}})();
+const form = document.getElementById("loginForm");
+const username = document.getElementById("username");
+const password = document.getElementById("password");
+const message = document.getElementById("message");
+const button = document.getElementById("loginButton");
+const rememberMe = document.getElementById("rememberMe");
+
+function showError(text){
+  message.className = "message error";
+  message.textContent = text;
+}
+
+function showSuccess(text){
+  message.className = "message success";
+  message.textContent = text;
+}
+
+form.addEventListener("submit", async (e)=>{
+  e.preventDefault();
+
+  message.className = "message";
+  message.textContent = "";
+
+  if(!username.value.trim()){
+    showError("Username wajib diisi.");
+    username.focus();
+    return;
+  }
+
+  if(!password.value){
+    showError("Password wajib diisi.");
+    password.focus();
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Memproses...";
+
+  try{
+    const response = await fetch("/login",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        username:username.value.trim(),
+        password:password.value,
+        rememberMe:rememberMe.checked
+      })
+    });
+
+    let data;
+
+    try{
+      data = await response.json();
+    }catch{
+      data = {
+        ok:false,
+        message:"Respons server tidak valid."
+      };
+    }
+
+    if(!response.ok || !data.ok){
+      showError(data.message || "Login gagal.");
+      button.disabled = false;
+      button.textContent = "Login";
+      return;
+    }
+
+    showSuccess("Login berhasil! Mengalihkan...");
+
+    setTimeout(()=>{
+      window.location.href =
+        data.redirect || "/dashboard.html";
+    },500);
+
+  }catch(error){
+    showError("Tidak dapat terhubung ke server.");
+    button.disabled = false;
+    button.textContent = "Login";
+  }
+});
+</script>
+
+</body>
+</html>

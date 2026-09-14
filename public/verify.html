@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifikasi Email</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #080808, #151515);
+      color: white;
+      padding: 20px;
+    }
+
+    .box {
+      width: 100%;
+      max-width: 400px;
+      padding: 30px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #bbb;
+      line-height: 1.5;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-top: 15px;
+      border-radius: 10px;
+      border: 1px solid #444;
+      background: #111;
+      color: white;
+      font-size: 16px;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 18px;
+      border: none;
+      border-radius: 10px;
+      background: #ffffff;
+      color: #000;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .back {
+      display: block;
+      margin-top: 20px;
+      color: #aaa;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+    <h1>Verifikasi Email</h1>
+
+    <p>
+      Masukkan kode verifikasi yang dikirim ke email kamu.
+    </p>
+
+    <form action="/verify" method="POST">
+
+      <input
+        type="hidden"
+        id="email"
+        name="email"
+      >
+
+      <input
+        type="text"
+        name="code"
+        placeholder="Masukkan kode 6 digit"
+        inputmode="numeric"
+        maxlength="6"
+        pattern="[0-9]{6}"
+        required
+      >
+
+      <button type="submit">
+        Verifikasi
+      </button>
+
+    </form>
+
+    <a class="back" href="/login.html">
+      Kembali ke Login
+    </a>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const email = params.get("email");
+
+    if (email) {
+      document.getElementById("email").value = email;
+    }
+  </script>
+
+</body>
+</html>

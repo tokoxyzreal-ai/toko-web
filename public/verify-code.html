@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verifikasi Kode - Toko Web</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{width:100%;max-width:420px;background:#fff;padding:30px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+h1{margin:0 0 8px}
+p{color:#667085;font-size:14px;line-height:1.5}
+input{width:100%;padding:14px;margin-top:15px;border:1px solid #d0d5dd;border-radius:10px;text-align:center;font-size:24px;letter-spacing:8px}
+button{width:100%;margin-top:18px;padding:13px;border:0;border-radius:10px;background:#1769e0;color:#fff;font-weight:700}
+#message{margin-top:15px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Verifikasi Kode</h1>
+<p>Masukkan kode 6 digit yang dikirim ke email kamu.</p>
+
+<form id="form">
+<input id="code" type="text" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required>
+<button id="btn">Verifikasi</button>
+</form>
+
+<div id="message"></div>
+</div>
+
+<script>
+const form=document.getElementById("form");
+const code=document.getElementById("code");
+const btn=document.getElementById("btn");
+const message=document.getElementById("message");
+
+form.addEventListener("submit",async e=>{
+ e.preventDefault();
+ btn.disabled=true;
+ btn.textContent="Memeriksa...";
+
+ try{
+  const r=await fetch("/verify-reset-code",{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({code:code.value.trim()})
+  });
+
+  const d=await r.json();
+  message.textContent=d.message||"Selesai.";
+
+  if(d.ok&&d.redirect){
+   setTimeout(()=>location.href=d.redirect,500);
+  }
+ }catch(e){
+  message.textContent="Tidak dapat terhubung ke server.";
+ }
+
+ btn.disabled=false;
+ btn.textContent="Verifikasi";
+});
+</script>
+</body>
+</html>

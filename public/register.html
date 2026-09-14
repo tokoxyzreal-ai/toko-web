@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Daftar - TokoWeb</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Arial,sans-serif;
+  background:#f4f7fb;
+  color:#172033;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.card{
+  width:100%;
+  max-width:410px;
+  background:white;
+  border-radius:22px;
+  padding:30px 25px;
+  box-shadow:0 10px 35px rgba(30,70,120,.12);
+  border:1px solid #e7edf5;
+}
+
+.logo{
+  text-align:center;
+  font-size:27px;
+  font-weight:800;
+  color:#1769e0;
+  margin-bottom:8px;
+}
+
+.subtitle{
+  text-align:center;
+  color:#718096;
+  margin-bottom:25px;
+  font-size:14px;
+}
+
+label{
+  display:block;
+  margin:16px 0 7px;
+  font-size:14px;
+  font-weight:600;
+}
+
+input{
+  width:100%;
+  height:48px;
+  padding:0 14px;
+  border:1px solid #d7dfeb;
+  border-radius:11px;
+  outline:none;
+  background:#fafcff;
+  color:#172033;
+  font-size:15px;
+}
+
+input:focus{
+  border-color:#2478ed;
+  box-shadow:0 0 0 3px rgba(36,120,237,.1);
+}
+
+.password-info{
+  margin-top:7px;
+  font-size:12px;
+  color:#8994a5;
+}
+
+.email-info{
+  margin-top:7px;
+  font-size:12px;
+  color:#718096;
+  line-height:1.4;
+}
+
+.message{
+  display:none;
+  margin-top:15px;
+  padding:12px 14px;
+  border-radius:10px;
+  font-size:13px;
+  line-height:1.4;
+}
+
+.message.error{
+  display:block;
+  background:#fff1f1;
+  color:#c62828;
+  border:1px solid #ffd0d0;
+}
+
+.message.success{
+  display:block;
+  background:#effaf3;
+  color:#198754;
+  border:1px solid #c9efd8;
+}
+
+button{
+  width:100%;
+  height:49px;
+  margin-top:20px;
+  border:0;
+  border-radius:11px;
+  background:#1769e0;
+  color:white;
+  font-size:15px;
+  font-weight:700;
+}
+
+button:disabled{
+  opacity:.65;
+}
+
+.bottom{
+  text-align:center;
+  margin-top:20px;
+  color:#718096;
+  font-size:14px;
+}
+
+.bottom a{
+  color:#1769e0;
+  text-decoration:none;
+  font-weight:700;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <div class="logo">TokoWeb</div>
+
+  <div class="subtitle">
+    Buat akun baru untuk melanjutkan
+  </div>
+
+  <form id="registerForm">
+
+    <label>Username</label>
+    <input
+      id="username"
+      name="username"
+      type="text"
+      placeholder="Masukkan username"
+      minlength="3"
+      autocomplete="username"
+      required
+    >
+
+    <label>Email</label>
+    <input
+      id="email"
+      name="email"
+      type="email"
+      placeholder="contoh@gmail.com"
+      autocomplete="email"
+      required
+    >
+
+    <div class="email-info">
+      Harap masukkan email yang benar agar bisa digunakan untuk reset password.
+    </div>
+
+    <label>Password</label>
+    <input
+      id="password"
+      name="password"
+      type="password"
+      placeholder="Minimal 6 karakter"
+      minlength="6"
+      autocomplete="new-password"
+      required
+    >
+
+    <div class="password-info" id="passwordInfo">
+      Minimal 6 karakter
+    </div>
+
+    <div class="message" id="message"></div>
+
+    <button id="submitButton" type="submit">
+      Daftar
+    </button>
+
+  </form>
+
+  <div class="bottom">
+    Sudah punya akun?
+    <a href="/login.html">Login</a>
+  </div>
+
+</div>
+
+<script>
+const form=document.getElementById("registerForm");
+const username=document.getElementById("username");
+const email=document.getElementById("email");
+const password=document.getElementById("password");
+const passwordInfo=document.getElementById("passwordInfo");
+const message=document.getElementById("message");
+const button=document.getElementById("submitButton");
+
+function showError(text){
+  message.className="message error";
+  message.textContent=text;
+}
+
+function showSuccess(text){
+  message.className="message success";
+  message.textContent=text;
+}
+
+function hideMessage(){
+  message.className="message";
+  message.textContent="";
+}
+
+password.addEventListener("input",()=>{
+  const n=password.value.length;
+
+  if(n===0){
+    passwordInfo.textContent="Minimal 6 karakter";
+    passwordInfo.style.color="#8994a5";
+  }else if(n<6){
+    passwordInfo.textContent="Masih kurang "+(6-n)+" karakter";
+    passwordInfo.style.color="#c62828";
+  }else{
+    passwordInfo.textContent="Password sudah memenuhi syarat";
+    passwordInfo.style.color="#198754";
+  }
+});
+
+form.addEventListener("submit",async(e)=>{
+  e.preventDefault();
+
+  hideMessage();
+
+  const user=username.value.trim();
+  const mail=email.value.trim();
+  const pass=password.value;
+
+  if(user.length<3){
+    showError("Username minimal 3 karakter.");
+    username.focus();
+    return;
+  }
+
+  if(!email.validity.valid){
+    showError("Masukkan alamat email yang valid.");
+    email.focus();
+    return;
+  }
+
+  if(pass.length<6){
+    showError("Password minimal 6 karakter.");
+    password.focus();
+    return;
+  }
+
+  button.disabled=true;
+  button.textContent="Memproses...";
+
+  try{
+    const response=await fetch("/register",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        username:user,
+        email:mail,
+        password:pass
+      })
+    });
+
+    let data;
+
+    try{
+      data=await response.json();
+    }catch{
+      data={
+        ok:false,
+        message:"Respons server tidak valid."
+      };
+    }
+
+    if(!response.ok||!data.ok){
+      showError(data.message||"Pendaftaran gagal.");
+      button.disabled=false;
+      button.textContent="Daftar";
+      return;
+    }
+
+    showSuccess("Pendaftaran berhasil! Mengalihkan ke Login...");
+
+    setTimeout(()=>{
+      window.location.href=data.redirect||"/login.html?registered=1";
+    },500);
+
+  }catch(error){
+    showError("Tidak dapat terhubung ke server.");
+    button.disabled=false;
+    button.textContent="Daftar";
+  }
+});
+</script>
+
+</body>
+</html>

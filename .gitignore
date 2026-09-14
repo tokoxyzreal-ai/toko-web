@@ -1,0 +1,4 @@
+.env
+users.json
+reset-data.json
+node_modules/
