@@ -1,363 +1,63 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Dashboard - TokoWeb</title>
-
-<style>
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#f4f7fb;
-  color:#172033;
-}
-
-.navbar{
-  height:64px;
-  background:white;
-  border-bottom:1px solid #e5eaf1;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 20px;
-  position:sticky;
-  top:0;
-  z-index:10;
-}
-
-.logo{
-  font-size:22px;
-  font-weight:800;
-  color:#1769e0;
-}
-
-.nav-right{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.user-mini{
-  font-size:13px;
-  color:#667085;
-}
-
-.logout{
-  text-decoration:none;
-  color:#d93025;
-  font-size:13px;
-  font-weight:700;
-  padding:9px 12px;
-  border:1px solid #ffd5d2;
-  border-radius:9px;
-}
-
-.container{
-  width:100%;
-  max-width:1100px;
-  margin:auto;
-  padding:28px 18px 50px;
-}
-
-.welcome{
-  background:white;
-  border:1px solid #e5eaf1;
-  border-radius:18px;
-  padding:24px;
-  box-shadow:0 7px 25px rgba(30,70,120,.07);
-}
-
-.welcome h1{
-  margin:0 0 8px;
-  font-size:26px;
-}
-
-.welcome p{
-  margin:0;
-  color:#667085;
-}
-
-.section-title{
-  margin:30px 0 15px;
-  font-size:20px;
-}
-
-.products{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:16px;
-}
-
-.product{
-  background:white;
-  border:1px solid #e5eaf1;
-  border-radius:16px;
-  padding:20px;
-  box-shadow:0 7px 25px rgba(30,70,120,.06);
-}
-
-.product-icon{
-  width:48px;
-  height:48px;
-  border-radius:12px;
-  background:#eaf2ff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#1769e0;
-  font-size:22px;
-  font-weight:bold;
-  margin-bottom:15px;
-}
-
-.product h3{
-  margin:0 0 8px;
-  font-size:17px;
-}
-
-.product p{
-  color:#718096;
-  font-size:13px;
-  line-height:1.5;
-  min-height:40px;
-}
-
-.price{
-  font-size:19px;
-  font-weight:800;
-  color:#1769e0;
-  margin:15px 0;
-}
-
-.buy{
-  width:100%;
-  height:43px;
-  border:0;
-  border-radius:10px;
-  background:#1769e0;
-  color:white;
-  font-weight:700;
-  cursor:pointer;
-}
-
-.buy:active{
-  transform:scale(.98);
-}
-
-.info{
-  margin-top:25px;
-  background:#fff;
-  border:1px solid #e5eaf1;
-  border-radius:16px;
-  padding:20px;
-}
-
-.info h3{
-  margin:0 0 15px;
-}
-
-.account-row{
-  display:flex;
-  justify-content:space-between;
-  padding:11px 0;
-  border-bottom:1px solid #edf0f4;
-  font-size:14px;
-}
-
-.account-row:last-child{
-  border-bottom:0;
-}
-
-.account-label{
-  color:#718096;
-}
-
-.account-value{
-  font-weight:600;
-}
-
-.loading{
-  text-align:center;
-  padding:50px;
-  color:#718096;
-}
-
-@media(max-width:700px){
-  .products{
-    grid-template-columns:1fr;
-  }
-
-  .user-mini{
-    display:none;
-  }
-
-  .welcome h1{
-    font-size:22px;
-  }
-
-  .navbar{
-    padding:0 14px;
-  }
-}
-</style>
-<link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toko Web</title>
+  <link rel="stylesheet" href="/style.css">
 </head>
-
 <body>
 
-<div class="navbar">
-  <div class="logo">TokoWeb</div>
+  <nav class="navbar">
+    <div class="logo">TOKO WEB</div>
+    <a href="/logout" class="logout">Keluar</a>
+  </nav>
 
-  <div class="nav-right">
-    <div class="user-mini" id="navUser">
-      Memuat akun...
-    </div>
+  <main class="container">
 
-    <a class="logout" href="/logout">
-      Logout
-    </a>
-  </div>
-</div>
+    <section class="hero">
+      <h1>Selamat Datang 👋</h1>
+      <p>Pilih server yang ingin kamu pesan.</p>
+    </section>
 
-<main class="container" id="app">
+    <section class="server-section">
 
-  <div class="loading">
-    Memuat dashboard...
-  </div>
-
-</main>
-
-<script>
-async function loadDashboard(){
-
-  try{
-
-    const response = await fetch("/api/me");
-
-    if(!response.ok){
-      window.location.href="/login.html";
-      return;
-    }
-
-    const data = await response.json();
-
-    if(!data.ok || !data.user){
-      window.location.href="/login.html";
-      return;
-    }
-
-    const user = data.user;
-
-    document.getElementById("navUser").textContent =
-      user.username;
-
-    document.getElementById("app").innerHTML = `
-
-      <section class="welcome">
-        <h1>Selamat datang, ${escapeHTML(user.username)} 👋</h1>
-        <p>
-          Kamu berhasil login. Selamat berbelanja di TokoWeb.
-        </p>
-      </section>
-
-      <h2 class="section-title">
-        Produk Terbaru
-      </h2>
-
-      <section class="products">
-
-        <div class="product">
-          <div class="product-icon">A</div>
-          <h3>Produk Digital A</h3>
-          <p>
-            Produk digital praktis untuk kebutuhan kamu.
-          </p>
-          <div class="price">Rp25.000</div>
-          <button class="buy" onclick="buyProduct('Produk Digital A')">
-            Beli Sekarang
-          </button>
-        </div>
-
-        <div class="product">
-          <div class="product-icon">B</div>
-          <h3>Produk Digital B</h3>
-          <p>
-            Pilihan digital dengan proses pembelian sederhana.
-          </p>
-          <div class="price">Rp50.000</div>
-          <button class="buy" onclick="buyProduct('Produk Digital B')">
-            Beli Sekarang
-          </button>
-        </div>
-
-        <div class="product">
-          <div class="product-icon">C</div>
-          <h3>Produk Digital C</h3>
-          <p>
-            Produk digital lainnya yang tersedia di toko.
-          </p>
-          <div class="price">Rp75.000</div>
-          <button class="buy" onclick="buyProduct('Produk Digital C')">
-            Beli Sekarang
-          </button>
-        </div>
-
-      </section>
-
-      <section class="info">
-
-        <h3>Informasi Akun</h3>
-
-        <div class="account-row">
-          <span class="account-label">Username</span>
-          <span class="account-value">
-            ${escapeHTML(user.username)}
-          </span>
-        </div>
-
-        <div class="account-row">
-          <span class="account-label">Email</span>
-          <span class="account-value">
-            ${escapeHTML(user.email)}
-          </span>
-        </div>
-
-      </section>
-    `;
-
-  }catch(error){
-
-    document.getElementById("app").innerHTML = `
-      <div class="welcome">
-        <h1>Terjadi kesalahan</h1>
-        <p>Tidak dapat memuat data akun.</p>
+      <div class="section-title">
+        <h2>Server</h2>
+        <button class="add-server" onclick="addServer()">
+          + Tambahkan Server
+        </button>
       </div>
-    `;
 
-  }
-}
+      <div id="serverList">
 
-function escapeHTML(text){
-  return String(text)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
+        <div class="server-card">
+          <div>
+            <span class="status">● ONLINE</span>
+            <h3>Server 1</h3>
+            <p>Server utama</p>
+          </div>
 
-function buyProduct(name){
-  alert(
-    "Produk \"" + name +
-    "\" dipilih. Sistem pemesanan akan kita buat berikutnya."
-  );
-}
+          <button class="buy-button" onclick="buyServer('Server 1')">
+            Beli Sekarang
+          </button>
+        </div>
 
-loadDashboard();
-</script>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    function buyServer(serverName) {
+      alert("Pesanan " + serverName + " akan dibuat.");
+    }
+
+    function addServer() {
+      alert("Fitur Tambahkan Server akan kita buat berikutnya.");
+    }
+  </script>
 
 </body>
 </html>
