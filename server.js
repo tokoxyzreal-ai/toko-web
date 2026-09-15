@@ -270,6 +270,151 @@ app.get("/logout", (req, res) => {
 // SERVER
 // =========================
 
+
+
+// =========================
+// ORDER + UPLOAD BUKTI
+// =========================
+
+const multer = require("multer");
+
+const ORDERS_FILE = path.join(__dirname, "orders.json");
+
+function loadOrders() {
+  try {
+    if (!fs.existsSync(ORDERS_FILE)) {
+      fs.writeFileSync(ORDERS_FILE, "[]");
+    }
+    return JSON.parse(fs.readFileSync(ORDERS_FILE, "utf8"));
+  } catch (error) {
+    console.error("Gagal membaca orders:", error);
+    return [];
+  }
+}
+
+function saveOrders(orders) {
+  fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2));
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "uploads"));
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, Date.now() + "-" + crypto.randomBytes(6).toString("hex") + ext);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024
+  },
+  fileFilter: (req, file, cb) => {
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowed.includes(file.mimetype)) {
+      return cb(new Error("Bukti pembayaran harus berupa JPG, PNG, atau WEBP."));
+    }
+    cb(null, true);
+  }
+});
+
+app.post("/api/orders", (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({
+        ok: false,
+        message: "Silakan login terlebih dahulu."
+      });
+    }
+
+    const orders = loadOrders();
+
+    const order = {
+      id: "ORD-" + Date.now(),
+      userId: req.session.user.id,
+      username: req.session.user.username,
+      email: req.session.user.email,
+      product: "Server 1",
+      amount: 20000,
+      status: "Menunggu Pembayaran",
+      proof: null,
+      createdAt: new Date().toISOString()
+    };
+
+    orders.push(order);
+    saveOrders(orders);
+
+    res.json({
+      ok: true,
+      orderId: order.id,
+      redirect: "/payment.html?order=" + encodeURIComponent(order.id)
+    });
+
+  } catch (error) {
+    console.error("CREATE ORDER ERROR:", error);
+    res.status(500).json({
+      ok: false,
+      message: "Gagal membuat pesanan."
+    });
+  }
+});
+
+app.post("/api/orders/:id/proof", upload.single("proof"), (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({
+        ok: false,
+        message: "Silakan login terlebih dahulu."
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        ok: false,
+        message: "Bukti pembayaran wajib diupload."
+      });
+    }
+
+    const orders = loadOrders();
+
+    const order = orders.find(
+      o =>
+        o.id === req.params.id &&
+        String(o.userId) === String(req.session.user.id)
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        ok: false,
+        message: "Pesanan tidak ditemukan."
+      });
+    }
+
+    order.proof = "/uploads/" + req.file.filename;
+    order.status = "Menunggu Verifikasi";
+    order.proofUploadedAt = new Date().toISOString();
+
+    saveOrders(orders);
+
+    res.json({
+      ok: true,
+      message: "Bukti pembayaran berhasil dikirim.",
+      status: order.status
+    });
+
+  } catch (error) {
+    console.error("UPLOAD PROOF ERROR:", error);
+    res.status(500).json({
+      ok: false,
+      message: "Gagal mengupload bukti pembayaran."
+    });
+  }
+});
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log("");
   console.log("==============================");

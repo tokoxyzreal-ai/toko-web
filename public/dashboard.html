@@ -50,8 +50,30 @@
   </main>
 
   <script>
-    function buyServer(serverName) {
-      alert("Pesanan " + serverName + " akan dibuat.");
+    async function buyServer(serverName) {
+      try {
+        const response = await fetch("/api/orders", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            product: serverName
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          alert(data.message || "Gagal membuat pesanan.");
+          return;
+        }
+
+        window.location.href = data.redirect;
+
+      } catch (error) {
+        alert("Terjadi kesalahan koneksi.");
+      }
     }
 
     function addServer() {

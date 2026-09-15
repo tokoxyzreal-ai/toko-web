@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pembayaran - Toko Web</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo">TOKO WEB</div>
+    <a href="/dashboard.html" class="logout">Kembali</a>
+  </nav>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Pembayaran Server 1</h1>
+      <p>Selesaikan pembayaran untuk melanjutkan pesanan.</p>
+    </section>
+
+    <section class="server-card payment-card">
+      <h2>Total Pembayaran</h2>
+      <div class="price">Rp20.000</div>
+
+      <div class="qris-box">
+        <h3>Scan QRIS</h3>
+        <p>Gunakan aplikasi pembayaran yang mendukung QRIS.</p>
+
+        <!-- GANTI qris.jpg dengan foto QRIS kamu -->
+        <img src="/qris.jpg" alt="QRIS Pembayaran" class="qris-image">
+
+        <p class="order-info">
+          ID Pesanan:
+          <strong id="orderId">-</strong>
+        </p>
+      </div>
+
+      <div class="upload-box">
+        <h3>Sudah membayar?</h3>
+        <p>Upload screenshot bukti pembayaran kamu.</p>
+
+        <form id="proofForm">
+          <input
+            type="file"
+            id="proof"
+            name="proof"
+            accept="image/png,image/jpeg,image/webp"
+            required
+          >
+
+          <button type="submit" class="buy-button">
+            Kirim Bukti Pembayaran
+          </button>
+        </form>
+
+        <p id="status"></p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const orderId = params.get("order");
+
+    document.getElementById("orderId").textContent = orderId || "-";
+
+    document.getElementById("proofForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const status = document.getElementById("status");
+      const file = document.getElementById("proof").files[0];
+
+      if (!orderId) {
+        status.textContent = "ID pesanan tidak ditemukan.";
+        return;
+      }
+
+      if (!file) {
+        status.textContent = "Pilih screenshot bukti pembayaran.";
+        return;
+      }
+
+      status.textContent = "Mengirim bukti...";
+
+      const formData = new FormData();
+      formData.append("proof", file);
+
+      try {
+        const response = await fetch(
+          "/api/orders/" + encodeURIComponent(orderId) + "/proof",
+          {
+            method: "POST",
+            body: formData
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          status.textContent = data.message || "Gagal mengirim bukti.";
+          return;
+        }
+
+        status.textContent =
+          "Bukti berhasil dikirim. Menunggu verifikasi admin.";
+
+        document.getElementById("proofForm").reset();
+
+      } catch (error) {
+        status.textContent = "Terjadi kesalahan koneksi.";
+      }
+    });
+  </script>
+
+</body>
+</html>
